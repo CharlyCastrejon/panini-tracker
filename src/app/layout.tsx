@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Book, Repeat } from "lucide-react";
-import Link from "next/link";
+import Navigation from "@/components/Navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,16 +30,7 @@ export default function RootLayout({
           {children}
         </main>
 
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-3 z-20 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-          <Link href="/" className="flex flex-col items-center text-emerald-700">
-            <Book size={24} />
-            <span className="text-xs mt-1 font-medium">Álbum</span>
-          </Link>
-          <Link href="/swaps" className="flex flex-col items-center text-slate-400 hover:text-emerald-700 transition-colors">
-            <Repeat size={24} />
-            <span className="text-xs mt-1 font-medium">Intercambio</span>
-          </Link>
-        </nav>
+        <Navigation />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useStickerStore } from "@/store/useStickerStore";
-import { getAllStickerIds } from "@/lib/albumData";
+import { getAllStickerIds, formatStickers } from "@/lib/albumData";
 import { useMemo, useState, useEffect } from "react";
 import { Copy, Check, Share2 } from "lucide-react";
 
@@ -17,6 +17,7 @@ export default function Swaps() {
   const lists = useMemo(() => {
     const missing: string[] = [];
     const duplicates: { id: string, count: number }[] = [];
+    const duplicateIdsForFormat: string[] = [];
 
     const allIds = getAllStickerIds();
 
@@ -26,23 +27,27 @@ export default function Swaps() {
         missing.push(id);
       } else if (count > 1) {
         duplicates.push({ id, count: count - 1 });
+        // Add the duplicate ID as many times as it is duplicated? 
+        // Typically people just want to know WHICH ones are duplicated to trade.
+        // We'll just list the unique IDs that we have duplicates of for the format string.
+        duplicateIdsForFormat.push(id);
       }
     });
 
-    return { missing, duplicates };
+    return { missing, duplicates, duplicateIdsForFormat };
   }, [inventory]);
 
   const generateShareText = () => {
     let text = "🏆 Mis Estampas Panini 2026 🏆\n\n";
     
-    if (lists.duplicates.length > 0) {
+    if (lists.duplicateIdsForFormat.length > 0) {
       text += "✅ TENGO REPETIDAS:\n";
-      text += lists.duplicates.map(d => d.id).join(", ") + "\n\n";
+      text += formatStickers(lists.duplicateIdsForFormat) + "\n\n";
     }
 
     if (lists.missing.length > 0) {
       text += "❌ ME FALTAN:\n";
-      text += lists.missing.join(", ") + "\n";
+      text += formatStickers(lists.missing) + "\n";
     }
 
     return text;
@@ -110,11 +115,11 @@ export default function Swaps() {
               <span className="w-2 h-2 rounded-full bg-blue-500"></span>
               Mis Repetidas ({lists.duplicates.reduce((acc, curr) => acc + curr.count, 0)})
             </h3>
-            {lists.duplicates.length === 0 ? (
+            {lists.duplicateIdsForFormat.length === 0 ? (
               <p className="text-sm text-slate-400 italic">No tienes repetidas aún.</p>
             ) : (
-              <div className="bg-blue-50 p-4 rounded-xl text-blue-900 font-medium leading-relaxed">
-                {lists.duplicates.map(d => d.id).join(", ")}
+              <div className="bg-blue-50 p-4 rounded-xl text-blue-900 font-medium leading-relaxed whitespace-pre-wrap">
+                {formatStickers(lists.duplicateIdsForFormat)}
               </div>
             )}
           </div>
@@ -127,8 +132,8 @@ export default function Swaps() {
             {lists.missing.length === 0 ? (
               <p className="text-sm text-emerald-600 font-medium italic">¡Felicidades! Has completado el álbum.</p>
             ) : (
-              <div className="bg-slate-50 p-4 rounded-xl text-slate-600 font-medium leading-relaxed">
-                {lists.missing.join(", ")}
+              <div className="bg-slate-50 p-4 rounded-xl text-slate-600 font-medium leading-relaxed whitespace-pre-wrap">
+                {formatStickers(lists.missing)}
               </div>
             )}
           </div>

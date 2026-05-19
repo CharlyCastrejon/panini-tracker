@@ -161,4 +161,56 @@ export const getAllStickerIds = (): string[] => {
   return ids;
 };
 
+export const getTeamForSticker = (id: string): AlbumTeam | undefined => {
+  for (const group of ALBUM_GROUPS) {
+    for (const team of group.teams) {
+      if (team.customIds && team.customIds.includes(id)) {
+        return team;
+      }
+      if (!team.customIds && id.startsWith(team.prefix + ' ')) {
+        const numStr = id.split(' ')[1];
+        if (!isNaN(Number(numStr))) {
+          return team;
+        }
+      }
+    }
+  }
+  return undefined;
+};
+
+export const formatStickers = (stickerIds: string[]): string => {
+  const grouped: Record<string, { emoji: string, prefix: string, numbers: string[] }> = {};
+  
+  stickerIds.forEach(id => {
+    const team = getTeamForSticker(id);
+    const prefix = team ? team.prefix : id.split(' ')[0] || '❓';
+    let emoji = team ? team.name.split(' ')[0] : '❓';
+    
+    // Group all FWC sections under a single emoji
+    if (prefix === 'FWC') {
+      emoji = '🏆';
+    }
+
+    const number = id.includes(' ') ? id.substring(id.indexOf(' ') + 1) : id;
+    
+    if (!grouped[prefix]) {
+      grouped[prefix] = { emoji, prefix, numbers: [] };
+    }
+    grouped[prefix].numbers.push(number);
+  });
+
+  return Object.values(grouped)
+    .map(g => {
+      // Sort numbers numerically (handling '00' as 0)
+      const sortedNumbers = g.numbers.sort((a, b) => {
+        const numA = a === '00' ? 0 : Number(a);
+        const numB = b === '00' ? 0 : Number(b);
+        if (isNaN(numA) || isNaN(numB)) return a.localeCompare(b);
+        return numA - numB;
+      });
+      return `${g.emoji} ${g.prefix}: ${sortedNumbers.join(', ')}`;
+    })
+    .join('\n');
+};
+
 export const TOTAL_STICKERS = getAllStickerIds().length;
