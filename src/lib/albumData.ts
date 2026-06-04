@@ -178,6 +178,23 @@ export const getTeamForSticker = (id: string): AlbumTeam | undefined => {
   return undefined;
 };
 
+export const getGroupNameForSticker = (id: string): string => {
+  for (const group of ALBUM_GROUPS) {
+    for (const team of group.teams) {
+      if (team.customIds && team.customIds.includes(id)) {
+        return group.name;
+      }
+      if (!team.customIds && id.startsWith(team.prefix + ' ')) {
+        const numStr = id.split(' ')[1];
+        if (!isNaN(Number(numStr))) {
+          return group.name;
+        }
+      }
+    }
+  }
+  return 'Sin grupo';
+};
+
 export const formatStickers = (stickerIds: string[]): string => {
   const grouped: Record<string, { emoji: string, prefix: string, numbers: string[] }> = {};
   
@@ -214,3 +231,23 @@ export const formatStickers = (stickerIds: string[]): string => {
 };
 
 export const TOTAL_STICKERS = getAllStickerIds().length;
+
+const groupOrderMap: Record<string, number> = {};
+getAllStickerIds().forEach((id, index) => {
+  groupOrderMap[id] = index;
+});
+
+export const sortByGroup = (ids: string[]): string[] => {
+  return [...ids].sort((a, b) => (groupOrderMap[a] ?? Infinity) - (groupOrderMap[b] ?? Infinity));
+};
+
+export const sortByAlpha = (ids: string[]): string[] => {
+  return [...ids].sort((a, b) => {
+    const prefixA = a.split(' ')[0];
+    const prefixB = b.split(' ')[0];
+    if (prefixA !== prefixB) return prefixA.localeCompare(prefixB);
+    const numA = Number(a.split(' ')[1]) || 0;
+    const numB = Number(b.split(' ')[1]) || 0;
+    return numA - numB;
+  });
+};
