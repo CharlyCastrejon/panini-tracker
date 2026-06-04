@@ -2,6 +2,8 @@
 
 A modern, responsive web application built with Next.js to help collectors track their Panini World Cup 2026 sticker album progress, manage duplicates, and easily share swap lists.
 
+🔗 **[Live Demo](https://panini-tracker.vercel.app)**
+
 ## ✨ Features
 
 - **Interactive Album:** Easily tap stickers to mark them as collected, or tap again to mark them as duplicates.
